@@ -1,0 +1,20 @@
+name: Build Chinese iOS IPA
+on: workflow_dispatch
+jobs:
+  ios:
+    runs-on: macos-14
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          repository: sonilyan/fallout2-ce
+          ref: truetype-support
+      - name: Configure
+        run: cmake -B build -D CMAKE_TOOLCHAIN_FILE=cmake/toolchain/ios.toolchain.cmake -D ENABLE_BITCODE=0 -D PLATFORM=OS64 -G Xcode -D CMAKE_XCODE_ATTRIBUTE_CODE_SIGN_IDENTITY=''
+      - name: Build
+        run: cmake --build build --config RelWithDebInfo -j $(sysctl -n hw.physicalcpu)
+      - name: Pack
+        run: cd build && cpack -C RelWithDebInfo
+      - uses: actions/upload-artifact@v4
+        with:
+          name: fallout2-ce-chs-ipa
+          path: build/fallout2-ce.ipa
